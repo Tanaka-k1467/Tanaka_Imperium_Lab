@@ -2,34 +2,122 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Tanaka Imperium Lab</title>
+  <title>Tanaka Imperium Lab - 英単語クイズ</title>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
-　<link rel="apple-touch-icon" href="apple-touch-icon.png">
-　<link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
-　<link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
-
+  <meta name="theme-color" content="#00ccff">
   <style>
-    body { font-family: sans-serif; padding: 2em; max-width: 800px; margin: auto; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 1em; table-layout: fixed; }
-    td, th { padding: 0.5em; border-bottom: 1px solid #ddd; text-align: left; }
-    input { width: 100%; padding: 0.3em; font-size: 1em; }
-    .correct { color: green; font-weight: bold; width: 6em; }
-    .incorrect { color: red; font-weight: bold; width: 6em; }
-    #stats { font-weight: bold; margin-bottom: 1em; }
-    button { margin: 0.3em; padding: 0.4em 1em; font-size: 1em; }
-    #study-view, #wrong-view { display: none; }
-    .locked { background-color: #eee; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at center, #0a0a1a 0%, #000000 100%);
+      color: #ccf6ff;
+      padding: 2em;
+      max-width: 800px;
+      margin: auto;
+      position: relative;
+      overflow-x: hidden;
+    }
+    h1 {
+      text-align: center;
+      color: #00ccff;
+      text-shadow: 0 0 10px #00ccff, 0 0 20px #00ccff;
+      margin-bottom: 0.2em;
+    }
+    .subhead {
+      text-align: center;
+      color: #0099cc;
+      font-size: 1.2em;
+      margin-bottom: 1em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1em;
+      table-layout: fixed;
+      backdrop-filter: blur(5px);
+    }
+    td, th {
+      padding: 0.5em;
+      border-bottom: 1px solid #004466;
+      text-align: left;
+    }
+    input {
+      width: 100%;
+      padding: 0.4em;
+      font-size: 1em;
+      background-color: #001f33;
+      border: 1px solid #00ccff;
+      color: #ccf6ff;
+      box-shadow: 0 0 5px #00ccff88 inset;
+    }
+    .correct {
+      color: #00ffcc;
+      font-weight: bold;
+      text-shadow: 0 0 5px #00ffcc;
+    }
+    .incorrect {
+      color: #ff5555;
+      font-weight: bold;
+      text-shadow: 0 0 5px #ff5555;
+    }
+    .locked {
+      background-color: #333;
+      color: #aaa;
+    }
+    #stats {
+      font-weight: bold;
+      margin-bottom: 1em;
+      text-align: center;
+      color: #88e0ff;
+      text-shadow: 0 0 6px #00ccff;
+    }
+    button {
+      background-color: #002244;
+      color: #00ccff;
+      border: 1px solid #00ccff;
+      padding: 0.6em 1.2em;
+      margin: 0.5em;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 0 0 8px #00ccff80;
+    }
+    button:hover {
+      background-color: #003355;
+    }
+    #study-view, #wrong-view {
+      display: none;
+    }
+    .glow-ring {
+      position: absolute;
+      top: -300px;
+      left: 50%;
+      width: 800px;
+      height: 800px;
+      margin-left: -400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,204,255,0.1) 0%, transparent 70%);
+      z-index: -1;
+      animation: pulse 4s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.1); opacity: 0.6; }
+    }
   </style>
 </head>
 <body>
-  <h1>英単語クイズ - Unit 1</h1>
+  <div class="glow-ring"></div>
+  <h1>TANAKA</h1>
+  <div class="subhead">IMPERIUM LAB</div>
+
   <div id="main-view">
     <div id="stats">正解数: 0 / 0（正答率: 0%）</div>
     <table id="quiz-table">
       <tr><th>日本語</th><th>英語入力</th><th>判定</th></tr>
     </table>
-    <button onclick="showStudyView()">勉強する</button>
-    <button onclick="showWrongView()">不正解の答え</button>
+    <div style="text-align:center;">
+      <button onclick="showStudyView()">勉強する</button>
+      <button onclick="showWrongView()">不正解の答え</button>
+    </div>
   </div>
 
   <div id="study-view">
@@ -85,7 +173,7 @@
 
         const resultCell = document.createElement("td");
         resultCell.id = `result-${index}`;
-        resultCell.textContent = "　"; // 表のズレ防止のため空白
+        resultCell.textContent = "　";
         row.appendChild(resultCell);
 
         table.appendChild(row);
@@ -93,8 +181,7 @@
     }
 
     function checkAnswer(index, inputElem) {
-      if (isCorrectFlags[index]) return; // すでに正解なら再判定なし
-
+      if (isCorrectFlags[index]) return;
       const userInput = inputElem.value.trim().toLowerCase();
       const correct = questions[index].en.toLowerCase();
       const resultCell = document.getElementById(`result-${index}`);
