@@ -2,28 +2,54 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>英単語クイズ - 一覧形式（再判定対応）</title>
+  <title>英単語クイズ - 学習モード付き</title>
   <style>
-    body { font-family: sans-serif; padding: 2em; max-width: 600px; margin: auto; }
-    table { width: 100%; border-collapse: collapse; }
+    body { font-family: sans-serif; padding: 2em; max-width: 800px; margin: auto; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1em; }
     td, th { padding: 0.5em; border-bottom: 1px solid #ddd; }
     input { width: 100%; padding: 0.3em; font-size: 1em; }
     .correct { color: green; font-weight: bold; }
     .incorrect { color: red; font-weight: bold; }
+    #stats { font-weight: bold; margin-bottom: 1em; }
+    button { margin: 0.3em; padding: 0.4em 1em; font-size: 1em; }
+    #study-view, #wrong-view { display: none; }
   </style>
 </head>
 <body>
-  <h1>英単語クイズ - Unit 1（一覧形式 / 再判定対応）</h1>
-  <table id="quiz-table">
-    <tr><th>日本語</th><th>英語入力</th><th>判定</th></tr>
-  </table>
+  <h1>英単語クイズ - Unit 1</h1>
+  <div id="main-view">
+    <div id="stats">正解数: 0 / 0（正答率: 0%）</div>
+    <table id="quiz-table">
+      <tr><th>日本語</th><th>英語入力</th><th>判定</th></tr>
+    </table>
+    <button onclick="showStudyView()">勉強する</button>
+    <button onclick="showWrongView()">不正解の答え</button>
+  </div>
+
+  <div id="study-view">
+    <h2>全単語リスト（勉強用）</h2>
+    <table id="study-table"><tr><th>日本語</th><th>英語</th></tr></table>
+    <button onclick="goBack()">戻る</button>
+  </div>
+
+  <div id="wrong-view">
+    <h2>不正解または未回答</h2>
+    <table id="wrong-table"><tr><th>日本語</th><th>英語</th></tr></table>
+    <button onclick="goBack()">戻る</button>
+  </div>
 
   <script>
     let questions = [];
+    let correctCount = 0;
+    let totalAnswered = 0;
+    let answeredFlags = [];
+    let inputValues = [];
 
     async function loadQuestions() {
       const res = await fetch("units/unit1.json");
       questions = await res.json();
+      answeredFlags = Array(questions.length).fill(false);
+      inputValues = Array(questions.length).fill("");
       renderTable();
     }
 
@@ -41,7 +67,13 @@
         input.type = "text";
         input.dataset.index = index;
         input.addEventListener("keydown", function(e) {
-          if (e.key === "Enter") checkAnswer(index, this);
+          if (e.key === "Enter") {
+            checkAnswer(index, this);
+            moveToNext(index);
+          }
+        });
+        input.addEventListener("input", function() {
+          inputValues[index] = this.value;
         });
         inputCell.appendChild(input);
         row.appendChild(inputCell);
@@ -59,13 +91,77 @@
       const correct = questions[index].en.toLowerCase();
       const resultCell = document.getElementById(`result-${index}`);
 
-      if (userInput === correct) {
+      const wasAnswered = answeredFlags[index];
+      const isCorrectNow = userInput === correct;
+
+      if (isCorrectNow) {
         resultCell.textContent = "正解！";
         resultCell.className = "correct";
       } else {
-        resultCell.textContent = `不正解。正解: ${correct}`;
-        resultCell.className = "incorrect";
+        resultCell.textContent = "";
+        resultCell.className = "";
       }
+
+      if (!wasAnswered) {
+        totalAnswered++;
+        if (isCorrectNow) correctCount++;
+        answeredFlags[index] = true;
+      } else {
+        if (isCorrectNow && resultCell.className !== "correct") {
+          correctCount++;
+        } else if (!isCorrectNow && resultCell.className === "correct") {
+          correctCount--;
+        }
+      }
+
+      updateStats();
+    }
+
+    function updateStats() {
+      const percent = totalAnswered === 0 ? 0 : Math.round((correctCount / totalAnswered) * 100);
+      document.getElementById("stats").textContent =
+        `正解数: ${correctCount} / ${totalAnswered}（正答率: ${percent}%）`;
+    }
+
+    function moveToNext(currentIndex) {
+      const nextInput = document.querySelector(`input[data-index="${currentIndex + 1}"]`);
+      if (nextInput) {
+        nextInput.focus();
+      }
+    }
+
+    function showStudyView() {
+      document.getElementById("main-view").style.display = "none";
+      document.getElementById("study-view").style.display = "block";
+      const table = document.getElementById("study-table");
+      table.innerHTML = "<tr><th>日本語</th><th>英語</th></tr>";
+      questions.forEach(q => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${q.jp}</td><td>${q.en}</td>`;
+        table.appendChild(row);
+      });
+    }
+
+    function showWrongView() {
+      document.getElementById("main-view").style.display = "none";
+      document.getElementById("wrong-view").style.display = "block";
+      const table = document.getElementById("wrong-table");
+      table.innerHTML = "<tr><th>日本語</th><th>英語</th></tr>";
+      questions.forEach((q, i) => {
+        const input = inputValues[i].trim().toLowerCase();
+        const correct = q.en.toLowerCase();
+        if (input === "" || input !== correct) {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${q.jp}</td><td>${q.en}</td>`;
+          table.appendChild(row);
+        }
+      });
+    }
+
+    function goBack() {
+      document.getElementById("study-view").style.display = "none";
+      document.getElementById("wrong-view").style.display = "none";
+      document.getElementById("main-view").style.display = "block";
     }
 
     loadQuestions();
