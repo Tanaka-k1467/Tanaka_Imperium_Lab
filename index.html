@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>英単語クイズ</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; text-align: center; }
+    #question { font-size: 1.5em; margin-bottom: 1em; }
+    input { font-size: 1em; padding: 0.5em; width: 200px; }
+    button { font-size: 1em; padding: 0.5em 1em; }
+    #result { margin-top: 1em; font-weight: bold; }
+    #score { margin-top: 1em; }
+  </style>
+</head>
+<body>
+  <h1>英単語クイズ - Unit 1</h1>
+  <div id="question">Loading...</div>
+  <input type="text" id="answer" placeholder="英語で入力">
+  <button onclick="checkAnswer()">送信</button>
+  <div id="result"></div>
+  <div id="score"></div>
+
+  <script>
+    let current = 0;
+    let score = 0;
+    let questions = [];
+
+    async function loadQuestions() {
+      const res = await fetch("units/unit1.json");
+      questions = await res.json();
+      showQuestion();
+    }
+
+    function showQuestion() {
+      if (current < questions.length) {
+        document.getElementById("question").textContent = `Q: 「${questions[current].jp}」は英語で？`;
+        document.getElementById("answer").value = "";
+        document.getElementById("result").textContent = "";
+      } else {
+        document.getElementById("question").textContent = "終了！";
+        document.getElementById("score").textContent = `スコア: ${score} / ${questions.length}`;
+        document.getElementById("answer").style.display = "none";
+        document.querySelector("button").style.display = "none";
+      }
+    }
+
+    function checkAnswer() {
+      const userInput = document.getElementById("answer").value.trim().toLowerCase();
+      const correct = questions[current].en.toLowerCase();
+
+      if (userInput === correct) {
+        score++;
+        document.getElementById("result").textContent = "正解！";
+      } else {
+        document.getElementById("result").textContent = `不正解。正解は ${correct}`;
+      }
+
+      current++;
+      setTimeout(showQuestion, 1000);
+    }
+
+    loadQuestions();
+  </script>
+</body>
+</html>
