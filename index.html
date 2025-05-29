@@ -2,23 +2,21 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>英単語クイズ（一覧形式）</title>
+  <title>英単語クイズ - 一覧形式（再判定対応）</title>
   <style>
-    body { font-family: sans-serif; padding: 2em; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 1em; }
-    th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
-    input { width: 100%; padding: 0.4em; font-size: 1em; }
-    .correct { background-color: #d4f7d4; }
-    .incorrect { background-color: #f7d4d4; }
-    #score { font-weight: bold; margin-top: 1em; }
-    button { padding: 0.5em 1em; font-size: 1em; }
+    body { font-family: sans-serif; padding: 2em; max-width: 600px; margin: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    td, th { padding: 0.5em; border-bottom: 1px solid #ddd; }
+    input { width: 100%; padding: 0.3em; font-size: 1em; }
+    .correct { color: green; font-weight: bold; }
+    .incorrect { color: red; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h1>英単語クイズ - 一覧形式</h1>
-  <div id="quiz-area">読み込み中...</div>
-  <button onclick="checkAllAnswers()">答え合わせ</button>
-  <div id="score"></div>
+  <h1>英単語クイズ - Unit 1（一覧形式 / 再判定対応）</h1>
+  <table id="quiz-table">
+    <tr><th>日本語</th><th>英語入力</th><th>判定</th></tr>
+  </table>
 
   <script>
     let questions = [];
@@ -26,37 +24,48 @@
     async function loadQuestions() {
       const res = await fetch("units/unit1.json");
       questions = await res.json();
-      renderQuiz();
+      renderTable();
     }
 
-    function renderQuiz() {
-      const quizArea = document.getElementById("quiz-area");
-      quizArea.innerHTML = "<table><tr><th>日本語</th><th>英語を入力</th><th>判定</th></tr>" +
-        questions.map((q, i) => `
-          <tr>
-            <td>${q.jp}</td>
-            <td><input type="text" id="input-${i}"></td>
-            <td id="result-${i}">未判定</td>
-          </tr>
-        `).join("") + "</table>";
-    }
+    function renderTable() {
+      const table = document.getElementById("quiz-table");
+      questions.forEach((q, index) => {
+        const row = document.createElement("tr");
 
-    function checkAllAnswers() {
-      let correctCount = 0;
-      questions.forEach((q, i) => {
-        const userInput = document.getElementById(`input-${i}`).value.trim().toLowerCase();
-        const correct = q.en.toLowerCase();
-        const resultCell = document.getElementById(`result-${i}`);
-        if (userInput === correct) {
-          resultCell.textContent = "正解";
-          resultCell.className = "correct";
-          correctCount++;
-        } else {
-          resultCell.textContent = `✖（正解: ${correct}）`;
-          resultCell.className = "incorrect";
-        }
+        const jpCell = document.createElement("td");
+        jpCell.textContent = q.jp;
+        row.appendChild(jpCell);
+
+        const inputCell = document.createElement("td");
+        const input = document.createElement("input");
+        input.type = "text";
+        input.dataset.index = index;
+        input.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") checkAnswer(index, this);
+        });
+        inputCell.appendChild(input);
+        row.appendChild(inputCell);
+
+        const resultCell = document.createElement("td");
+        resultCell.id = `result-${index}`;
+        row.appendChild(resultCell);
+
+        table.appendChild(row);
       });
-      document.getElementById("score").textContent = `スコア: ${correctCount} / ${questions.length}`;
+    }
+
+    function checkAnswer(index, inputElem) {
+      const userInput = inputElem.value.trim().toLowerCase();
+      const correct = questions[index].en.toLowerCase();
+      const resultCell = document.getElementById(`result-${index}`);
+
+      if (userInput === correct) {
+        resultCell.textContent = "正解！";
+        resultCell.className = "correct";
+      } else {
+        resultCell.textContent = `不正解。正解: ${correct}`;
+        resultCell.className = "incorrect";
+      }
     }
 
     loadQuestions();
