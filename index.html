@@ -2,17 +2,18 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>英単語クイズ - 学習モード付き</title>
+  <title>英単語クイズ - 強化版</title>
   <style>
     body { font-family: sans-serif; padding: 2em; max-width: 800px; margin: auto; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 1em; }
-    td, th { padding: 0.5em; border-bottom: 1px solid #ddd; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1em; table-layout: fixed; }
+    td, th { padding: 0.5em; border-bottom: 1px solid #ddd; text-align: left; }
     input { width: 100%; padding: 0.3em; font-size: 1em; }
-    .correct { color: green; font-weight: bold; }
-    .incorrect { color: red; font-weight: bold; }
+    .correct { color: green; font-weight: bold; width: 6em; }
+    .incorrect { color: red; font-weight: bold; width: 6em; }
     #stats { font-weight: bold; margin-bottom: 1em; }
     button { margin: 0.3em; padding: 0.4em 1em; font-size: 1em; }
     #study-view, #wrong-view { display: none; }
+    .locked { background-color: #eee; }
   </style>
 </head>
 <body>
@@ -41,15 +42,14 @@
   <script>
     let questions = [];
     let correctCount = 0;
-    let totalAnswered = 0;
-    let answeredFlags = [];
     let inputValues = [];
+    let isCorrectFlags = [];
 
     async function loadQuestions() {
       const res = await fetch("units/unit1.json");
       questions = await res.json();
-      answeredFlags = Array(questions.length).fill(false);
       inputValues = Array(questions.length).fill("");
+      isCorrectFlags = Array(questions.length).fill(false);
       renderTable();
     }
 
@@ -80,6 +80,7 @@
 
         const resultCell = document.createElement("td");
         resultCell.id = `result-${index}`;
+        resultCell.textContent = "　"; // 表のズレ防止のため空白
         row.appendChild(resultCell);
 
         table.appendChild(row);
@@ -87,45 +88,37 @@
     }
 
     function checkAnswer(index, inputElem) {
+      if (isCorrectFlags[index]) return; // すでに正解なら再判定なし
+
       const userInput = inputElem.value.trim().toLowerCase();
       const correct = questions[index].en.toLowerCase();
       const resultCell = document.getElementById(`result-${index}`);
 
-      const wasAnswered = answeredFlags[index];
-      const isCorrectNow = userInput === correct;
-
-      if (isCorrectNow) {
+      if (userInput === correct) {
         resultCell.textContent = "正解！";
         resultCell.className = "correct";
+        inputElem.disabled = true;
+        inputElem.classList.add("locked");
+        isCorrectFlags[index] = true;
+        correctCount++;
       } else {
-        resultCell.textContent = "";
-        resultCell.className = "";
-      }
-
-      if (!wasAnswered) {
-        totalAnswered++;
-        if (isCorrectNow) correctCount++;
-        answeredFlags[index] = true;
-      } else {
-        if (isCorrectNow && resultCell.className !== "correct") {
-          correctCount++;
-        } else if (!isCorrectNow && resultCell.className === "correct") {
-          correctCount--;
-        }
+        resultCell.textContent = "不正解";
+        resultCell.className = "incorrect";
       }
 
       updateStats();
     }
 
     function updateStats() {
-      const percent = totalAnswered === 0 ? 0 : Math.round((correctCount / totalAnswered) * 100);
+      const total = questions.length;
+      const percent = total === 0 ? 0 : Math.round((correctCount / total) * 100);
       document.getElementById("stats").textContent =
-        `正解数: ${correctCount} / ${totalAnswered}（正答率: ${percent}%）`;
+        `正解数: ${correctCount} / ${total}（正答率: ${percent}%）`;
     }
 
     function moveToNext(currentIndex) {
       const nextInput = document.querySelector(`input[data-index="${currentIndex + 1}"]`);
-      if (nextInput) {
+      if (nextInput && !nextInput.disabled) {
         nextInput.focus();
       }
     }
@@ -150,7 +143,7 @@
       questions.forEach((q, i) => {
         const input = inputValues[i].trim().toLowerCase();
         const correct = q.en.toLowerCase();
-        if (input === "" || input !== correct) {
+        if (!isCorrectFlags[i]) {
           const row = document.createElement("tr");
           row.innerHTML = `<td>${q.jp}</td><td>${q.en}</td>`;
           table.appendChild(row);
