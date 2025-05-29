@@ -2,61 +2,61 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>英単語クイズ</title>
+  <title>英単語クイズ（一覧形式）</title>
   <style>
-    body { font-family: sans-serif; padding: 2em; text-align: center; }
-    #question { font-size: 1.5em; margin-bottom: 1em; }
-    input { font-size: 1em; padding: 0.5em; width: 200px; }
-    button { font-size: 1em; padding: 0.5em 1em; }
-    #result { margin-top: 1em; font-weight: bold; }
-    #score { margin-top: 1em; }
+    body { font-family: sans-serif; padding: 2em; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1em; }
+    th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
+    input { width: 100%; padding: 0.4em; font-size: 1em; }
+    .correct { background-color: #d4f7d4; }
+    .incorrect { background-color: #f7d4d4; }
+    #score { font-weight: bold; margin-top: 1em; }
+    button { padding: 0.5em 1em; font-size: 1em; }
   </style>
 </head>
 <body>
-  <h1>英単語クイズ - Unit 1</h1>
-  <div id="question">Loading...</div>
-  <input type="text" id="answer" placeholder="英語で入力">
-  <button onclick="checkAnswer()">送信</button>
-  <div id="result"></div>
+  <h1>英単語クイズ - 一覧形式</h1>
+  <div id="quiz-area">読み込み中...</div>
+  <button onclick="checkAllAnswers()">答え合わせ</button>
   <div id="score"></div>
 
   <script>
-    let current = 0;
-    let score = 0;
     let questions = [];
 
     async function loadQuestions() {
       const res = await fetch("units/unit1.json");
       questions = await res.json();
-      showQuestion();
+      renderQuiz();
     }
 
-    function showQuestion() {
-      if (current < questions.length) {
-        document.getElementById("question").textContent = `Q: 「${questions[current].jp}」は英語で？`;
-        document.getElementById("answer").value = "";
-        document.getElementById("result").textContent = "";
-      } else {
-        document.getElementById("question").textContent = "終了！";
-        document.getElementById("score").textContent = `スコア: ${score} / ${questions.length}`;
-        document.getElementById("answer").style.display = "none";
-        document.querySelector("button").style.display = "none";
-      }
+    function renderQuiz() {
+      const quizArea = document.getElementById("quiz-area");
+      quizArea.innerHTML = "<table><tr><th>日本語</th><th>英語を入力</th><th>判定</th></tr>" +
+        questions.map((q, i) => `
+          <tr>
+            <td>${q.jp}</td>
+            <td><input type="text" id="input-${i}"></td>
+            <td id="result-${i}">未判定</td>
+          </tr>
+        `).join("") + "</table>";
     }
 
-    function checkAnswer() {
-      const userInput = document.getElementById("answer").value.trim().toLowerCase();
-      const correct = questions[current].en.toLowerCase();
-
-      if (userInput === correct) {
-        score++;
-        document.getElementById("result").textContent = "正解！";
-      } else {
-        document.getElementById("result").textContent = `不正解。正解は ${correct}`;
-      }
-
-      current++;
-      setTimeout(showQuestion, 1000);
+    function checkAllAnswers() {
+      let correctCount = 0;
+      questions.forEach((q, i) => {
+        const userInput = document.getElementById(`input-${i}`).value.trim().toLowerCase();
+        const correct = q.en.toLowerCase();
+        const resultCell = document.getElementById(`result-${i}`);
+        if (userInput === correct) {
+          resultCell.textContent = "正解";
+          resultCell.className = "correct";
+          correctCount++;
+        } else {
+          resultCell.textContent = `✖（正解: ${correct}）`;
+          resultCell.className = "incorrect";
+        }
+      });
+      document.getElementById("score").textContent = `スコア: ${correctCount} / ${questions.length}`;
     }
 
     loadQuestions();
