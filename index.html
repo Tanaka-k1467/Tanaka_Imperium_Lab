@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Tanaka Imperium Lab - ホーム</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#00ccff">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at center, #0a0a1a 0%, #000000 100%);
+      color: #ccf6ff;
+      padding: 2em;
+      max-width: 800px;
+      margin: auto;
+      position: relative;
+      overflow-x: hidden;
+    }
+    h1 {
+      text-align: center;
+      color: #00ccff;
+      text-shadow: 0 0 10px #00ccff, 0 0 20px #00ccff;
+      margin-bottom: 0.2em;
+    }
+    .subhead {
+      text-align: center;
+      color: #0099cc;
+      font-size: 1.2em;
+      margin-bottom: 2em;
+    }
+    .subject-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1em;
+    }
+    .subject-button {
+      background-color: #002244;
+      color: #00ccff;
+      border: 1px solid #00ccff;
+      padding: 1em 1.5em;
+      font-size: 1.2em;
+      cursor: pointer;
+      box-shadow: 0 0 8px #00ccff80;
+      text-align: center;
+      width: 240px;
+    }
+    .subject-button:hover {
+      background-color: #003355;
+    }
+    .glow-ring {
+      position: absolute;
+      top: -300px;
+      left: 50%;
+      width: 800px;
+      height: 800px;
+      margin-left: -400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,204,255,0.1) 0%, transparent 70%);
+      z-index: -1;
+      animation: pulse 4s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.1); opacity: 0.6; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-ring"></div>
+  <h1>TANAKA</h1>
+  <div class="subhead">IMPERIUM LAB</div>
+  <h2 style="text-align:center;">科目を選んでください</h2>
+  <div class="subject-grid">
+    <a href="modern_japanese/index.html" class="subject-button">現代文</a>
+    <a href="classical/index.html" class="subject-button">古典</a>
+    <a href="english_comm/index.html" class="subject-button">英語コミュニケーション</a>
+    <a href="logic_expr/index.html" class="subject-button">論理・表現</a>
+    <a href="geo/index.html" class="subject-button">地理総合</a>
+    <a href="public/index.html" class="subject-button">公共</a>
+  </div>
+</body>
+</html>
