@@ -71,10 +71,9 @@
       // 全て閉じる
       document.querySelectorAll('.dropdown').forEach(el => el.style.display = "none");
 
-      // 必要なところだけ開く
+      // 必要なところだけ開く（スクロールしない）
       if (!wasVisible) {
         drop.style.display = "flex";
-        setTimeout(() => drop.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       }
     }
   </script>
