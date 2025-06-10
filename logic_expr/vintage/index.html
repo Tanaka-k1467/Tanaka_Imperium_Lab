@@ -8,7 +8,7 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(circle at center, #0a0a1a 0%, #000000 100%);
+      background: radial-gradient(circle at center, #001a2e 0%, #000a14 100%);
       color: #ccf6ff;
       padding: 2em;
       max-width: 800px;
@@ -29,7 +29,6 @@
       background-color: #002244;
       border: 1px solid #00ccff;
       box-shadow: 0 0 8px #00ccff80;
-      padding: 0;
       overflow: hidden;
       transition: all 0.3s ease;
     }
@@ -62,6 +61,22 @@
     .dropdown a:hover {
       background-color: #003355;
     }
+    .back-container {
+      margin-top: 3em;
+      text-align: center;
+    }
+    .back-button {
+      background-color: #002244;
+      color: #00ccff;
+      border: 1px solid #00ccff;
+      padding: 0.8em 2em;
+      text-decoration: none;
+      font-size: 1em;
+      box-shadow: 0 0 8px #00ccff80;
+    }
+    .back-button:hover {
+      background-color: #003355;
+    }
   </style>
   <script>
     function toggleDropdown(id) {
@@ -71,7 +86,7 @@
       // 全て閉じる
       document.querySelectorAll('.dropdown').forEach(el => el.style.display = "none");
 
-      // 必要なところだけ開く（スクロールしない）
+      // 必要なところだけ開く
       if (!wasVisible) {
         drop.style.display = "flex";
       }
@@ -324,9 +339,7 @@
     
   </div>
   <div class="back-container">
-    <a href="../index.html" class="back-button">戻る</a>
+    <a href="../index.html" class="back-button">← 戻る（教材選択へ）</a>
   </div>
-</body>
-</html>
 </body>
 </html>
